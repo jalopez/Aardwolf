@@ -451,6 +451,7 @@ function showFile(data) {
         enableContinueAndStep();
     } else if (data.goToLine) {
 		line = data.goToLine;
+		$('#file-switcher option[value="' + data.file + '"]').attr('selected', true);
 	}
 
     if (textAreaContentHeight > textAreaHeight) {
