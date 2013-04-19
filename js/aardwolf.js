@@ -149,6 +149,9 @@ window.Aardwolf = new (function() {
                     };
                 })(stackDepth);
                 return false;
+            case 'get-dom':
+                getDom();
+                return false;
         }
     }
 
@@ -190,6 +193,58 @@ window.Aardwolf = new (function() {
         }
         return callstack;
     }
+
+    function getDom() {
+        var dom = xmlToJson(document.body);
+
+        var result = JSON.stringify(dom, function(k, v) {
+            if (typeof v == "function") {
+                return "[function]";
+            }
+            return v;
+        });
+        sendToServer('/console', {
+            command: 'dom',
+            dom: result
+        });
+    }
+
+    function xmlToJson(xml) {
+
+        // Create the return object
+        var obj = {};
+
+        if (xml.nodeType == 1) { // element
+            obj.tagName = xml.nodeName;
+            // do attributes
+            if (xml.attributes.length > 0) {
+                obj["@attributes"] = {};
+                for (var j = 0; j < xml.attributes.length; j++) {
+                    var attribute = xml.attributes.item(j);
+                    obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+                }
+            }
+        } else if (xml.nodeType == 3) { // text
+            obj = {
+                tagName: '#text',
+                value: xml.nodeValue
+            }
+        }
+
+        // do children
+        if (xml.hasChildNodes()) {
+            for(var i = 0; i < xml.childNodes.length; i++) {
+                var item = xml.childNodes.item(i);
+                if (typeof(obj.children) == "undefined") {
+                    obj.children = [xmlToJson(item)];
+                } else {
+
+                    obj.children.push(xmlToJson(item));
+                }
+            }
+        }
+        return obj;
+    };
 
     function safeJSONParse(str) {
         try {

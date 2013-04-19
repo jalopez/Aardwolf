@@ -14,6 +14,7 @@ var $stepOutBtn;
 var clearOnConnect = true;
 var lineNum = 0;
 var evalBig = false;
+var debug = true;
 
 var history = [];
 var currentHistoryPos = 0;
@@ -567,6 +568,9 @@ function processOutput(data) {
         case 'report-breakpoint':
             showBreakpoint(data);
             break;
+        case 'dom':
+            setDomTree(data);
+            break;
     }
 }
 
@@ -620,6 +624,7 @@ function changeToDebug() {
     $('#dom-tab').removeClass('active');
     $('#sidebar-debug').show();
     $('#sidebar-dom').hide();
+    debug = true;
 }
 
 function changeToDom() {
@@ -630,4 +635,16 @@ function changeToDom() {
     $('#sidebar-debug').hide();
     $('#sidebar-dom').show();
     $code.html('');
+    debug = false;
+
+    postToServer({ command: 'get-dom'});
+}
+
+function setDomTree(data){
+    if (debug) {
+        return;
+    }
+    $code.html(JSON.stringify(JSON.parse(data.dom), null, '\t')
+        .replace(/\n/g, '<br>&nbsp;&nbsp;&nbsp;')
+        .replace(/\t/g, '&nbsp;&nbsp;'));
 }
