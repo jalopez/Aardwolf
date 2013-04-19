@@ -110,7 +110,7 @@ function AardwolfServer(req, res) {
                     /* File must exist and must be located inside the filesDir */
                     if (fs.existsSync(fullRequestedFilePath) && fullRequestedFilePath.indexOf(filesDir) === 0) {
                         ok200({ data: fs.readFileSync(fullRequestedFilePath).toString(),
-								breakpoints: config.breakpointCache[requestedFile] || []});
+								breakpoints: (config.breakpointCache && config.breakpointCache[requestedFile]) || []});
                         break;
                     }
                 }

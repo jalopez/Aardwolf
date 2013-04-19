@@ -30,6 +30,10 @@ function DebugFileServer(req, res) {
     var fileServerBaseDir = path.normalize(config.fileServerBaseDir);
     var fullRequestedFilePath = path.join(fileServerBaseDir, requestedFile);
 
+    if (!config.breakpointCache) {
+        config.breakpointCache = {};
+    }
+
     /* alias for serving the debug library */
     if (requestedFile.toLowerCase() == '/aardwolf.js') {
         util.serveStaticFile(res, path.join(__dirname, '../js/aardwolf.js'));
@@ -49,7 +53,11 @@ function DebugFileServer(req, res) {
 
         if (rewriter) {
             var content = fs.readFileSync(fullRequestedFilePath).toString();
-            content = rewriter.addDebugStatements(requestedFile, content);
+            var processedFile = rewriter.addDebugStatements(requestedFile, content);
+
+            content = processedFile.file;
+            config.breakpointCache[requestedFile] = processedFile.breakpoints;
+
             res.writeHead(200, {'Content-Type': 'application/javascript'});
             res.end(content);
         }
