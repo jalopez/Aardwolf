@@ -18,6 +18,11 @@
 
     <body>
         <div id="top-toolbar">
+            <div id="tabs">
+                <span id="debug-tab" class="active">Debug JS</span>
+                <span id="dom-tab">DOM Inspection</span>
+            </div>
+
             <button id="btn-continue" class="button play green" disabled>continue</button>
             <span id="controls-coffeescript">
                 <button id="btn-step" class="button next green" disabled>step</button>
@@ -34,6 +39,7 @@
             <select id="file-switcher">
             </select>
 
+
             <div id="options">
                 <input type="checkbox" id="clearConsoleConnect" checked>Clear console on restart <br />
                 <input type="checkbox" id="redirectConsole">Redirect remote console here
@@ -48,13 +54,18 @@
             </div>
 
             <div id="sidebar" class="">
-                <h2>Breakpoints</h2>
-                <button id="btn-update-breakpoints" class="button small">update breakpoints</button>
-                <button id="btn-clear-breakpoints" class="button small">clear breakpoints</button>
-                <button id="btn-breakon-next" class="button small">break on next</button>
-                <ul id="breakpoints"></ul>
+                <div id="sidebar-debug">
+                    <h2>Breakpoints</h2>
+                    <button id="btn-update-breakpoints" class="button small">update breakpoints</button>
+                    <button id="btn-clear-breakpoints" class="button small">clear breakpoints</button>
+                    <button id="btn-breakon-next" class="button small">break on next</button>
+                    <ul id="breakpoints"></ul>
+                </div>
+                <div id="sidebar-dom"></div>
             </div>
         </div>
+
+
 
         <div id="output">
             <button id="btn-eval" class="button small">Execute</button>

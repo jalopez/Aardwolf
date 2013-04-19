@@ -264,8 +264,24 @@ textarea {
     user-select: none;
 }
 
+#tabs {
+    display: inline;
+    margin-right: 20px;
+    position: relative;
+    top: 12px;
+}
 
-
-
-
-
+#tabs span {
+    border-top: 2px solid #aaa;
+    border-left: 2px solid #aaa;
+    border-right: 2px solid #aaa;
+    padding: 10px 5px;
+    -webkit-border-radius: 3px 3px 0 0;
+    background-color: #eee;
+    cursor: pointer;
+    color: #aaa;
+}
+#tabs span.active {
+    background-color: #4d9cee;
+    color: #eee;
+}

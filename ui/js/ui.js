@@ -129,6 +129,9 @@ $(function() {
 		clearOnConnect = $(this).attr('checked') !== undefined;
 	});
 
+    $('#debug-tab').click(changeToDebug);
+    $('#dom-tab').click(changeToDom);
+
 	$('#redirectConsole').change(toggleRedirectConsole);
 
     $continueBtn = $('#btn-continue');
@@ -377,6 +380,8 @@ function showFile(data) {
     var literalList;
     var tokenize;
 
+    changeToDebug();
+
     if (fileExt(data.file) == 'coffee') {
         keywordList = keywordListCoffeeScript;
         literalList = literalListCoffeScript;
@@ -607,4 +612,22 @@ function getLine(string, lineNo) {
 		newString = newString.slice(newString.indexOf('\n') + 1);
 	}
 	return newString.substring(0, newString.indexOf('\n'));
+}
+
+
+function changeToDebug() {
+    $('#debug-tab').addClass('active');
+    $('#dom-tab').removeClass('active');
+    $('#sidebar-debug').show();
+    $('#sidebar-dom').hide();
+}
+
+function changeToDom() {
+    $('#dom-tab').addClass('active');
+    $('#debug-tab').removeClass('active');
+
+    $('#file-switcher').val('');
+    $('#sidebar-debug').hide();
+    $('#sidebar-dom').show();
+    $code.html('');
 }
