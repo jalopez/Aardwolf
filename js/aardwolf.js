@@ -8,7 +8,7 @@ window.Aardwolf = new (function() {
     var serverHost = '__SERVER_HOST__';
     var serverPort = '__SERVER_PORT__';
     var DOMRoot = function() {
-        return document;
+        return __ROOT_DOM__;
     };
 
     var serverUrl = 'http://' + serverHost + ':' + serverPort;

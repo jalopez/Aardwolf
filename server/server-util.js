@@ -21,7 +21,8 @@ function serveStaticFile(res, filename) {
             .toString()
             .replace(/__SERVER_HOST__/g, config.serverHost)
             .replace(/__SERVER_PORT__/g, config.serverPort)
-            .replace(/__FILE_SERVER_PORT__/g, config.fileServerPort);
+            .replace(/__FILE_SERVER_PORT__/g, config.fileServerPort)
+            .replace(/__ROOT_DOM__/g, config.rootDomNode);
     }
 
     res.writeHead(200, { 'Content-Type': ct });

@@ -57,6 +57,10 @@ config.whereToInsertAardwolf = '<head>';
 /* Aardwolf script tag */
 config.aardwolfScript = '<script type="text/javascript" src="aardwolf.js"></script>';
 
+
+/* From which node show dom structure of the remote app */
+config.rootDomNode = 'document';
+
 module.exports = config;
 
 /* Load overrides from config.local.js if it exists */
