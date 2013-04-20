@@ -644,7 +644,104 @@ function setDomTree(data){
     if (debug) {
         return;
     }
-    $code.html(JSON.stringify(JSON.parse(data.dom), null, '\t')
-        .replace(/\n/g, '<br>&nbsp;&nbsp;&nbsp;')
-        .replace(/\t/g, '&nbsp;&nbsp;'));
+    var lines = parseDom(JSON.parse(data.dom));
+
+    lines = lines.map(function(x, i) {
+            var num = String(i+1);
+
+            var paddedNum = '<span class="linenum">' +
+                '      '.substr(num.length) + num + ' ' +
+                '</span>';
+            return paddedNum + ' ' + x;
+        });
+
+    $code.html(lines.join('\n'));
+}
+
+
+function parseDom(dom, lines, indent) {
+    if (!lines) {
+        lines = [];
+    }
+    if (!indent) {
+        indent = 0;
+    }
+    var line = getLineIndent(indent);
+
+    if (dom.tagName === '#text') {
+        if (dom.value.match(/\S/)) {
+            line += '"';
+            var text = dom.value;
+            var textLines = text.split('\n');
+            line +=  textLines.shift();
+            lines.push(line);
+
+            for (var i = 0; i < textLines.length; i++) {
+                line = getLineIndent(indent) + textLines[i];
+                lines.push(line);
+            }
+
+            lines[lines.length - 1] += '"';
+        }
+    } else {
+        var tagName = dom.tagName;
+
+        if (tagName) {
+            tagName = tagName.toLowerCase();
+
+            line += '<span class="keyword">&lt;' + tagName;
+
+            var end = '&gt;';
+
+            if (!dom.children) {
+                end = ' /&gt;';
+            }
+
+            if (dom['@attributes']) {
+                line += '</span>';
+
+                for (var attr in dom['@attributes']) {
+                    line += ' ' + '<span class="literal">' + attr + '=</span>';
+                    line += '<span class="comment">"' + dom['@attributes'][attr] + '"</span>';
+                }
+
+                line += '<span class="keyword">' + end + '</span>';
+            } else {
+                line +=  end + '</span>';
+            }
+            lines.push(line);
+        }
+
+        if (dom.children) {
+            // Special case, only one text children, put it in the same line
+            if (dom.children.length === 1 && dom.children[0].tagName === '#text') {
+                line = lines[lines.length - 1];
+                line += dom.children[0].value;
+                line += '<span class="keyword">&lt;/' + tagName + '&gt;</span>';
+                lines[lines.length - 1] = line;
+
+            } else {
+
+                for (var i = 0, len = dom.children.length; i < len; i++) {
+                    lines = parseDom(dom.children[i], lines, tagName ? indent + 1 : indent);
+                }
+                if (tagName) {
+                    line = getLineIndent(indent) + '<span class="keyword">&lt;/' + tagName + '&gt;</span>';
+                    lines.push(line);
+                }
+
+            }
+        }
+    }
+
+    return lines;
+}
+
+function getLineIndent(indent) {
+    var tab = '   ',
+        text = '';
+    while (indent--) {
+        text += tab;
+    }
+    return text;
 }

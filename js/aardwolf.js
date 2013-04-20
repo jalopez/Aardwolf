@@ -7,6 +7,10 @@
 window.Aardwolf = new (function() {
     var serverHost = '__SERVER_HOST__';
     var serverPort = '__SERVER_PORT__';
+    var DOMRoot = function() {
+        return document;
+    };
+
     var serverUrl = 'http://' + serverHost + ':' + serverPort;
     var breakpoints = {};
     var shouldBreak = function() { return false; };
@@ -195,7 +199,7 @@ window.Aardwolf = new (function() {
     }
 
     function getDom() {
-        var dom = xmlToJson(document.body);
+        var dom = domToObject(DOMRoot());
 
         var result = JSON.stringify(dom, function(k, v) {
             if (typeof v == "function") {
@@ -209,37 +213,49 @@ window.Aardwolf = new (function() {
         });
     }
 
-    function xmlToJson(xml) {
+    function domToObject(dom, path) {
 
         // Create the return object
         var obj = {};
 
-        if (xml.nodeType == 1) { // element
-            obj.tagName = xml.nodeName;
+        if (!path) {
+            path = [];
+        }
+
+
+        if (dom.nodeType == 1) { // element
+            obj.tagName = dom.nodeName;
+
             // do attributes
-            if (xml.attributes.length > 0) {
+            if (dom.attributes.length > 0) {
                 obj["@attributes"] = {};
-                for (var j = 0; j < xml.attributes.length; j++) {
-                    var attribute = xml.attributes.item(j);
+                for (var j = 0; j < dom.attributes.length; j++) {
+                    var attribute = dom.attributes.item(j);
                     obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
                 }
             }
-        } else if (xml.nodeType == 3) { // text
+        } else if (dom.nodeType == 3) { // text
             obj = {
                 tagName: '#text',
-                value: xml.nodeValue
+                value: dom.nodeValue
             }
         }
+        obj.path = path;
+
+        var childPath;
 
         // do children
-        if (xml.hasChildNodes()) {
-            for(var i = 0; i < xml.childNodes.length; i++) {
-                var item = xml.childNodes.item(i);
+        if (dom.hasChildNodes()) {
+            for(var i = 0; i < dom.childNodes.length; i++) {
+                var item = dom.childNodes.item(i);
+                childPath = path.slice(0);
+                childPath.push(i);
+
                 if (typeof(obj.children) == "undefined") {
-                    obj.children = [xmlToJson(item)];
+                    obj.children = [domToObject(item, childPath)];
                 } else {
 
-                    obj.children.push(xmlToJson(item));
+                    obj.children.push(domToObject(item, childPath));
                 }
             }
         }
@@ -302,6 +318,27 @@ window.Aardwolf = new (function() {
                 if (!isInternalCommand) {
                     return;
                 }
+            }
+        }
+    };
+
+    this.updateDomNode = function(path, properties) {
+        var position,
+            candidate = DOMRoot();
+
+        while (path.length > 0) {
+            position = path.shift();
+            if (!candidate || !candidate.hasChildNodes()) {
+                // Wrong path, aborting
+                // TODO: Error handling
+                return;
+            }
+            candidate = candidate.childNodes.item(position);
+        }
+
+        if (candidate) {
+            for (var attr in properties) {
+                candidate.setAttribute(attr, properties[attr]);
             }
         }
     };
