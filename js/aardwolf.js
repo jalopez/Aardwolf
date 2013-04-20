@@ -156,6 +156,8 @@ window.Aardwolf = new (function() {
             case 'get-dom':
                 getDom();
                 return false;
+            case 'update-dom':
+                updateDom(cmd.path, cmd.attributes);
         }
     }
 
@@ -262,6 +264,32 @@ window.Aardwolf = new (function() {
         return obj;
     };
 
+    function updateDom (path, properties) {
+        var position,
+            candidate = DOMRoot();
+
+        properties = safeJSONParse(properties);
+
+        if (properties) {
+            while (path.length > 0) {
+                position = path.shift();
+                if (!candidate || !candidate.hasChildNodes()) {
+                    // Wrong path, aborting
+                    // TODO: Error handling
+                    return;
+                }
+                candidate = candidate.childNodes.item(position);
+            }
+
+            if (candidate) {
+                for (var attr in properties) {
+                    candidate.setAttribute(attr, properties[attr]);
+                }
+                getDom();
+            }
+        }
+    };
+
     function safeJSONParse(str) {
         try {
             return JSON.parse(str);
@@ -318,27 +346,6 @@ window.Aardwolf = new (function() {
                 if (!isInternalCommand) {
                     return;
                 }
-            }
-        }
-    };
-
-    this.updateDomNode = function(path, properties) {
-        var position,
-            candidate = DOMRoot();
-
-        while (path.length > 0) {
-            position = path.shift();
-            if (!candidate || !candidate.hasChildNodes()) {
-                // Wrong path, aborting
-                // TODO: Error handling
-                return;
-            }
-            candidate = candidate.childNodes.item(position);
-        }
-
-        if (candidate) {
-            for (var attr in properties) {
-                candidate.setAttribute(attr, properties[attr]);
             }
         }
     };

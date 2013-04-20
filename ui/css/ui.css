@@ -285,3 +285,8 @@ textarea {
     background-color: #4d9cee;
     color: #eee;
 }
+
+#dom-attributes {
+    width: 100%;
+    min-height: 200px;
+}

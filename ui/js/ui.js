@@ -15,6 +15,8 @@ var clearOnConnect = true;
 var lineNum = 0;
 var evalBig = false;
 var debug = true;
+var domLines = [];
+var domInfo;
 
 var history = [];
 var currentHistoryPos = 0;
@@ -132,6 +134,8 @@ $(function() {
 
     $('#debug-tab').click(changeToDebug);
     $('#dom-tab').click(changeToDom);
+
+    $('#dom-update').click(updateDomAttributes);
 
 	$('#redirectConsole').change(toggleRedirectConsole);
 
@@ -546,6 +550,7 @@ function processOutput(data) {
 			$('#redirectConsole').attr('checked', false);
             writeToConsole('Remote device connected.');
             initDebugger();
+            changeToDebug();
             break;
         case 'print-message':
             writeToConsole('<b>'+data.type + '</b>: ' + data.message);
@@ -624,6 +629,7 @@ function changeToDebug() {
     $('#dom-tab').removeClass('active');
     $('#sidebar-debug').show();
     $('#sidebar-dom').hide();
+    $code.html('');
     debug = true;
 }
 
@@ -636,6 +642,11 @@ function changeToDom() {
     $('#sidebar-dom').show();
     $code.html('');
     debug = false;
+    domInfo = null;
+
+    $('#dom-title').html('Choose a dom node to change its attributes');
+    $('#dom-update').attr('disabled', true);
+    $('#dom-attributes').val('');
 
     postToServer({ command: 'get-dom'});
 }
@@ -644,18 +655,31 @@ function setDomTree(data){
     if (debug) {
         return;
     }
+    domLines = [];
+    $code.html('');
     var lines = parseDom(JSON.parse(data.dom));
 
     lines = lines.map(function(x, i) {
-            var num = String(i+1);
+        var num = String(i+1);
+        var extraClass = '';
 
-            var paddedNum = '<span class="linenum">' +
-                '      '.substr(num.length) + num + ' ' +
-                '</span>';
-            return paddedNum + ' ' + x;
+        if (!domLines[i]) {
+            extraClass = ' no-breakpoint';
+        }
+
+        var paddedNum = '<span class="linenum' + extraClass + '" line="' + i + '">' +
+            '      '.substr(num.length) + num + ' ' +
+            '</span>';
+        return paddedNum + ' ' + x;
         });
 
     $code.html(lines.join('\n'));
+    $code.find('.linenum:not(.no-breakpoint)').click(selectDomNode);
+
+    if (domInfo && domLines[domInfo.line]) {
+        selectDomNode.call($code.find('.linenum[line=' + domInfo.line +']')[0]);
+    }
+
 }
 
 
@@ -709,6 +733,14 @@ function parseDom(dom, lines, indent) {
             } else {
                 line +=  end + '</span>';
             }
+
+            // Add needed information for remote update
+            domLines[lines.length] = {
+                line: lines.length,
+                tagName: tagName,
+                path: dom.path,
+                attributes: dom['@attributes']
+            };
             lines.push(line);
         }
 
@@ -744,4 +776,30 @@ function getLineIndent(indent) {
         text += tab;
     }
     return text;
+}
+
+function selectDomNode() {
+    var line = parseInt($(this).attr('line'));
+
+    domInfo = domLines[line];
+
+    if (!domInfo) {
+        return;
+    }
+    $code.find('.linenum').removeClass('breakpoint');
+
+    $(this).addClass('breakpoint');
+    $('#dom-update').attr('disabled', null);
+    $('#dom-title').html('Attributes for node: ' + domInfo.tagName);
+    $('#dom-attributes').val(JSON.stringify(domInfo.attributes, null, ' '));
+}
+
+function updateDomAttributes() {
+    if (!domInfo) {
+        return;
+    }
+
+    var newAttrs = $('#dom-attributes').val();
+
+    postToServer({ command: 'update-dom', path: domInfo.path, attributes: newAttrs });
 }
