@@ -74,6 +74,13 @@ The procedure is the same as above, except:
 * Reload the debugger UI first, then reload the page you just modified. The line "Mobile device connected." should appear in the UI's output pane.
 * You should now be able to evaluate code remotely, set breakpoints, etc.
 
+You can also preprocess your JS code to debug it offline:
+
+* Go to the config inside config folder (you can create a config.local.js file to override default config options).
+* Enable the offline rewriter process setting `config.runOfflineRewriter = true` (you can disable the file server in this mode)
+* Set the output folder where your debugging-enabled scripts will be placed, in the property `config.outputDir`
+* In this mode, you can let Aardwolf to inject the debugging support script in your index file. You can do so by configuring `indexFile`, `whereToInsertAardwolf` and `aardwolfScript` properties in the config file.
+
 
 Debugging processed or minified code
 ----------------------------------------------------------------------------------------------------
@@ -98,6 +105,13 @@ In most languages, making the modification should be pretty straightforward. PHP
 Now you should be ready to debug processed code. And since Aardwolf has access to the original files, its UI will display the original, unprocessed code for easier debugging.
 
 
+Solving memory issues
+----------------------------------------------------------------------------------------------------
+
+In some cases in which there are many JavaScript files to debug, you could face a memory issue. If you find that the application is running slowly, you can use `white-list` and `black-list` config properties and choose only the javascript files you want to debug.
+Using one of these properties, only the selected files will be processed by Aardwolf, improving application performance.
+
+
 How it works
 ----------------------------------------------------------------------------------------------------
 
@@ -112,7 +126,7 @@ Breaking code execution and evaluating code at that point is enabled by code rew
         }  
     );  
 
-The first two parameters â€“ file path and line number â€“ should be self explanatory. Every time `Aardwolf.updatePosition()` is called, the given file and line number are checked against a list of breakpoints, and if a match is found, script execution is halted by performing a synchronous XMLHttpRequest to the server.
+The first two parameters – file path and line number – should be self explanatory. Every time `Aardwolf.updatePosition()` is called, the given file and line number are checked against a list of breakpoints, and if a match is found, script execution is halted by performing a synchronous XMLHttpRequest to the server.
 
 The third parameter signals whether the current line contains a `debugger;` statement. If it does, we must break execution even if there is no breakpoint set on that line.
 
