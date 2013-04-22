@@ -126,7 +126,7 @@ Breaking code execution and evaluating code at that point is enabled by code rew
         }  
     );  
 
-The first two parameters â€“ file path and line number â€“ should be self explanatory. Every time `Aardwolf.updatePosition()` is called, the given file and line number are checked against a list of breakpoints, and if a match is found, script execution is halted by performing a synchronous XMLHttpRequest to the server.
+The first two parameters – file path and line number – should be self explanatory. Every time `Aardwolf.updatePosition()` is called, the given file and line number are checked against a list of breakpoints, and if a match is found, script execution is halted by performing a synchronous XMLHttpRequest to the server.
 
 The third parameter signals whether the current line contains a `debugger;` statement. If it does, we must break execution even if there is no breakpoint set on that line.
 
