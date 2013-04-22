@@ -247,7 +247,7 @@ window.Aardwolf = new (function() {
         var childPath;
 
         // do children
-        if (dom.hasChildNodes()) {
+        if (dom.childNodes && dom.childNodes.length) {
             for(var i = 0; i < dom.childNodes.length; i++) {
                 var item = dom.childNodes.item(i);
                 childPath = path.slice(0);
